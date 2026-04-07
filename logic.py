@@ -76,8 +76,16 @@ def _related_incident_report(rec):
     return _is_true(_get(rec, 'u_related_tasks', 'related_incident_report'))
 
 def _sms_log(rec):
+    # Primary: u_sms_log / sms_log (legacy sample format)
     val = _get(rec, 'u_sms_log', 'sms_log')
-    return None if _is_empty(val) else val
+    if not _is_empty(val):
+        return val
+    # Fallback: u_sms_message containing "Incident Resolved" means a proper
+    # resolve SMS was sent in ServiceNow exports where u_sms_log is not populated
+    msg = rec.get('u_sms_message', '')
+    if msg and 'Incident Resolved' in str(msg):
+        return msg
+    return None
 
 def _driftinfo(rec):
     val = _get(rec, 'u_cir_report_published', 'driftinfo')
