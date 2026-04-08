@@ -440,8 +440,6 @@ else:
         key="notes_editor",
     )
 
-    st.session_state["nm_data"] = edited_df
-
     # Copy all rows as tab-separated (paste directly into Excel)
     copy_all = "\n".join(
         f"{row['Week']}\t{row['Ticket']}\t{row['Identified Deviation']}\t{row['Notes']}\t{row['Measures Taken']}"
