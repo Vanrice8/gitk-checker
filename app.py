@@ -404,21 +404,24 @@ else:
     st.markdown("### 📋 Notes & Measures")
     st.caption("Notes and Measures are pre-filled with suggestions — edit any cell to customise. Select from the dropdown or type a custom value.")
 
-    nm_rows = []
-    for r in filtered:
-        dev = r["_identified_deviation"] or ""
-        nm_rows.append({
-            "Week":                r["_week"],
-            "Ticket":              r["_ticket_no"],
-            "Identified Deviation": dev,
-            "Notes":               suggest_notes(dev),
-            "Measures Taken":      suggest_measures(dev),
-        })
-
-    df_nm = pd.DataFrame(nm_rows)
+    # Use session_state so edits survive reruns
+    filter_key = tuple(r["_ticket_no"] for r in filtered)
+    if st.session_state.get("nm_filter_key") != filter_key:
+        nm_rows = []
+        for r in filtered:
+            dev = r["_identified_deviation"] or ""
+            nm_rows.append({
+                "Week":                r["_week"],
+                "Ticket":              r["_ticket_no"],
+                "Identified Deviation": dev,
+                "Notes":               suggest_notes(dev),
+                "Measures Taken":      suggest_measures(dev),
+            })
+        st.session_state["nm_data"]       = pd.DataFrame(nm_rows)
+        st.session_state["nm_filter_key"] = filter_key
 
     edited_df = st.data_editor(
-        df_nm,
+        st.session_state["nm_data"],
         column_config={
             "Week":                st.column_config.TextColumn(disabled=True, width="small"),
             "Ticket":              st.column_config.TextColumn(disabled=True, width="small"),
@@ -436,6 +439,8 @@ else:
         use_container_width=True,
         key="notes_editor",
     )
+
+    st.session_state["nm_data"] = edited_df
 
     # Copy all rows as tab-separated (paste directly into Excel)
     copy_all = "\n".join(
