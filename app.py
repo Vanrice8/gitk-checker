@@ -440,11 +440,10 @@ else:
         key="notes_editor",
     )
 
-    # Copy all rows as tab-separated, in the same sort order as the results table
-    ticket_order = {r["_ticket_no"]: i for i, r in enumerate(filtered)}
+    # Copy all rows tab-separated, same sort order as the results table
     copy_df = edited_df.copy()
-    copy_df["_sort"] = copy_df["Ticket"].map(ticket_order)
-    copy_df = copy_df.sort_values("_sort").drop(columns="_sort")
+    copy_sort_col = {"Week": "Week", "Ticket": "Ticket"}.get(sort_by, "Week")
+    copy_df = copy_df.sort_values(copy_sort_col, ascending=sort_asc)
 
     copy_all = "\n".join(
         f"{row['Week']}\t{row['Ticket']}\t{row['Identified Deviation']}\t{row['Notes']}\t{row['Measures Taken']}"
