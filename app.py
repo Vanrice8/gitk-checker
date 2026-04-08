@@ -267,6 +267,16 @@ st.markdown(f"### Results  `{len(filtered)} of {total} tickets`")
 if not filtered:
     st.warning("No tickets match the current filters.")
 else:
+    # ─── Sort controls ────────────────────────────────────────────────────
+    sort_col, sort_dir = st.columns([2, 1])
+    with sort_col:
+        sort_by = st.selectbox("Sort by", ["Week", "Ticket", "Duration", "SLA Status"], label_visibility="collapsed")
+    with sort_dir:
+        sort_asc = st.toggle("Ascending", value=True)
+
+    sort_key = {"Week": "_week", "Ticket": "_ticket_no", "Duration": "_incident_duration_days", "SLA Status": "_sla_status"}[sort_by]
+    filtered = sorted(filtered, key=lambda r: (r.get(sort_key) or ""), reverse=not sort_asc)
+
     # ─── Custom table with per-row copy buttons ───────────────────────────
     table_rows_html = ""
     for r in filtered:
@@ -316,10 +326,6 @@ else:
     border-bottom:1px solid #30363d; text-align:left; white-space:nowrap;
     user-select:none;
 }}
-.gitk-table th.sortable {{ cursor:pointer; }}
-.gitk-table th.sortable:hover {{ color:#c9d1d9; }}
-.gitk-table th.sort-asc::after  {{ content:" ▲"; color:#388bfd; }}
-.gitk-table th.sort-desc::after {{ content:" ▼"; color:#388bfd; }}
 .gitk-table td {{ padding:7px 10px; border-bottom:1px solid #21262d; color:#c9d1d9; vertical-align:middle; }}
 .gitk-table tr:hover td {{ background:#161b22; }}
 .gitk-table code {{ font-family:monospace; font-size:0.8rem; color:#79c0ff; }}
@@ -333,37 +339,13 @@ else:
 </style>
 <table class="gitk-table" id="gitk-main-table">
   <thead><tr>
-    <th class="sortable" onclick="sortTable(0)">Week</th>
-    <th class="sortable" onclick="sortTable(1)">Ticket</th>
+    <th>Week</th><th>Ticket</th>
     <th>Pri</th><th>Duration</th>
     <th>SLA Status</th><th>Drift</th><th>SMS</th><th>Report</th>
     <th>Result</th><th>Identified Deviations</th><th>Click to select → Ctrl+C</th>
   </tr></thead>
   <tbody>{table_rows_html}</tbody>
 </table>
-<script>
-var _sortDir = {{}};
-function sortTable(col) {{
-    var tbl = document.getElementById("gitk-main-table");
-    if (!tbl) return;
-    var tbody = tbl.tBodies[0];
-    var rows = Array.from(tbody.rows);
-    var asc = !_sortDir[col];
-    _sortDir = {{}};
-    _sortDir[col] = asc;
-    rows.sort(function(a, b) {{
-        var ta = a.cells[col].innerText.trim();
-        var tb = b.cells[col].innerText.trim();
-        return asc ? ta.localeCompare(tb) : tb.localeCompare(ta);
-    }});
-    rows.forEach(function(r) {{ tbody.appendChild(r); }});
-    var ths = tbl.tHead.rows[0].cells;
-    for (var i = 0; i < ths.length; i++) {{
-        ths[i].classList.remove("sort-asc", "sort-desc");
-    }}
-    ths[col].classList.add(asc ? "sort-asc" : "sort-desc");
-}}
-</script>
 """, unsafe_allow_html=True)
     st.markdown("<div style='margin-top:8px'></div>", unsafe_allow_html=True)
 
