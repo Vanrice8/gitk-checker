@@ -423,17 +423,11 @@ else:
     edited_df = st.data_editor(
         st.session_state["nm_data"],
         column_config={
-            "Week":                st.column_config.TextColumn(disabled=True, width="small"),
-            "Ticket":              st.column_config.TextColumn(disabled=True, width="small"),
+            "Week":                 st.column_config.TextColumn(disabled=True, width="small"),
+            "Ticket":               st.column_config.TextColumn(disabled=True, width="small"),
             "Identified Deviation": st.column_config.TextColumn(disabled=True, width="medium"),
-            "Notes":               st.column_config.SelectboxColumn(
-                                       options=NOTES_OPTIONS,
-                                       width="large",
-                                   ),
-            "Measures Taken":      st.column_config.SelectboxColumn(
-                                       options=MEASURES_OPTIONS,
-                                       width="medium",
-                                   ),
+            "Notes":                st.column_config.TextColumn(width="large"),
+            "Measures Taken":       st.column_config.TextColumn(width="medium"),
         },
         hide_index=True,
         use_container_width=True,
@@ -451,7 +445,6 @@ else:
         "📋 Select all (Ctrl+A) → Copy (Ctrl+C) → Paste in Excel",
         value=copy_all,
         height=160,
-        key="copy_all_area",
     )
 
     # ─── Per-row detail drill-down ────────────────────────────────────────
