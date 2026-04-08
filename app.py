@@ -344,10 +344,6 @@ else:
         dev_label = "Deviation Found" if dev == "Deviation Found" else "No Deviations"
         deviation_text = r["_identified_deviation"] or "—"
 
-        # Copy text: Excel column order Week | Ticket | Identified deviation (tab-separated)
-        copy_text = f"{week}\t{ticket}\t{deviation_text}"
-        copy_js   = copy_text.replace("'", "\'")
-
         table_rows_html += f"""
         <tr>
             <td>{week}</td>
@@ -360,10 +356,6 @@ else:
             <td style="text-align:center">{rep}</td>
             <td>{dev_dot} {dev_label}</td>
             <td class="dev-text">{deviation_text}</td>
-            <td>
-                <input class="copy-input" type="text" value="{copy_js}" readonly
-                    onclick="this.select()" title="Click then Ctrl+C to copy">
-            </td>
         </tr>"""
 
     st.markdown(f"""
@@ -379,19 +371,13 @@ else:
 .gitk-table tr:hover td {{ background:#161b22; }}
 .gitk-table code {{ font-family:monospace; font-size:0.8rem; color:#79c0ff; }}
 .dev-text {{ color:#f85149; font-size:0.78rem; min-width:200px; }}
-.copy-input {{
-    background:#161b22; border:1px solid #30363d; border-radius:4px;
-    color:#79c0ff; font-family:monospace; font-size:0.72rem;
-    padding:3px 6px; width:260px; cursor:text;
-}}
-.copy-input:focus {{ outline:2px solid #388bfd; border-color:#388bfd; }}
 </style>
 <table class="gitk-table" id="gitk-main-table">
   <thead><tr>
     <th>Week</th><th>Ticket</th>
     <th>Pri</th><th>Duration</th>
     <th>SLA Status</th><th>Drift</th><th>SMS</th><th>Report</th>
-    <th>Result</th><th>Identified Deviations</th><th>Click to select → Ctrl+C</th>
+    <th>Result</th><th>Identified Deviations</th>
   </tr></thead>
   <tbody>{table_rows_html}</tbody>
 </table>
