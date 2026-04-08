@@ -100,6 +100,55 @@ def load_json(uploaded_file):
         return None
 
 
+# ─── Notes / Measures suggestions ────────────────────────────────────────────
+
+NOTES_OPTIONS = [
+    "After manual observation, no SLA breaches could be identified",
+    "Complicated service restoration",
+    "Incident caused and solved by external provider.",
+    "Incident priority downgraded, after manual check of incident p2 duration, no deviation found.",
+    "Incident resolved before MSI had the chance to put up driftinfo",
+    "Incident was flagged as a security incident, sms distribution is at the discretion of Incident manager and MOD",
+    "Incident was raised retrospectively for logging purpose due to it being resolved when it reached MSI",
+    "No Driftinfo published due to P2 without immediate user impact",
+    "No SMS was sent, in accordance with the agreement with Verksamhet Beredskap",
+    "Application user pool had already been informed of the issue, after agreement with VB, it was decided to omit publishing of Driftinfo",
+    "P2 without user impact, sms should have been sent to IT management",
+]
+
+MEASURES_OPTIONS = [
+    "No measures taken",
+    "Incident management team has been sensitized to the SLA lead time",
+    "MSI has been sensitized to the established SMS distribution routines",
+]
+
+
+def suggest_notes(dev: str) -> str:
+    d = dev or ""
+    if "Manual SLA" in d:
+        return "Incident priority downgraded, after manual check of incident p2 duration, no deviation found."
+    if "SLA Breached" in d and "No SMS" in d:
+        return "Incident was flagged as a security incident, sms distribution is at the discretion of Incident manager and MOD"
+    if "SLA Breached" in d:
+        return "After manual observation, no SLA breaches could be identified"
+    if "Driftinfo" in d and "No SMS" in d:
+        return "Incident was raised retrospectively for logging purpose due to it being resolved when it reached MSI"
+    if "Driftinfo" in d:
+        return "Incident was raised retrospectively for logging purpose due to it being resolved when it reached MSI"
+    if "No SMS" in d:
+        return "Incident was raised retrospectively for logging purpose due to it being resolved when it reached MSI"
+    return ""
+
+
+def suggest_measures(dev: str) -> str:
+    d = dev or ""
+    if "SLA Breached" in d:
+        return "Incident management team has been sensitized to the SLA lead time"
+    if "No SMS" in d and "SLA" not in d:
+        return "No measures taken"
+    return "No measures taken"
+
+
 def fmt_duration(days: float | None) -> str:
     if days is None or (isinstance(days, float) and math.isnan(days)):
         return "—"
@@ -348,6 +397,57 @@ else:
 </table>
 """, unsafe_allow_html=True)
     st.markdown("<div style='margin-top:8px'></div>", unsafe_allow_html=True)
+
+    # ─── Notes & Measures editor ──────────────────────────────────────────
+
+    st.markdown("---")
+    st.markdown("### 📋 Notes & Measures")
+    st.caption("Notes and Measures are pre-filled with suggestions — edit any cell to customise. Select from the dropdown or type a custom value.")
+
+    nm_rows = []
+    for r in filtered:
+        dev = r["_identified_deviation"] or ""
+        nm_rows.append({
+            "Week":                r["_week"],
+            "Ticket":              r["_ticket_no"],
+            "Identified Deviation": dev,
+            "Notes":               suggest_notes(dev),
+            "Measures Taken":      suggest_measures(dev),
+        })
+
+    df_nm = pd.DataFrame(nm_rows)
+
+    edited_df = st.data_editor(
+        df_nm,
+        column_config={
+            "Week":                st.column_config.TextColumn(disabled=True, width="small"),
+            "Ticket":              st.column_config.TextColumn(disabled=True, width="small"),
+            "Identified Deviation": st.column_config.TextColumn(disabled=True, width="medium"),
+            "Notes":               st.column_config.SelectboxColumn(
+                                       options=NOTES_OPTIONS,
+                                       width="large",
+                                   ),
+            "Measures Taken":      st.column_config.SelectboxColumn(
+                                       options=MEASURES_OPTIONS,
+                                       width="medium",
+                                   ),
+        },
+        hide_index=True,
+        use_container_width=True,
+        key="notes_editor",
+    )
+
+    # Copy all rows as tab-separated (paste directly into Excel)
+    copy_all = "\n".join(
+        f"{row['Week']}\t{row['Ticket']}\t{row['Identified Deviation']}\t{row['Notes']}\t{row['Measures Taken']}"
+        for _, row in edited_df.iterrows()
+    )
+    st.text_area(
+        "📋 Select all (Ctrl+A) → Copy (Ctrl+C) → Paste in Excel",
+        value=copy_all,
+        height=160,
+        key="copy_all_area",
+    )
 
     # ─── Per-row detail drill-down ────────────────────────────────────────
 
