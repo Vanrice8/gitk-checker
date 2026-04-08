@@ -76,15 +76,24 @@ def _related_incident_report(rec):
     return _is_true(_get(rec, 'u_related_tasks', 'related_incident_report'))
 
 def _sms_log(rec):
-    # Primary: u_sms_log / sms_log (legacy sample format)
+    import json as _json
+    # Legacy sample format
     val = _get(rec, 'u_sms_log', 'sms_log')
     if not _is_empty(val):
         return val
-    # Fallback: u_sms_message containing "Incident Resolved" means a proper
-    # resolve SMS was sent in ServiceNow exports where u_sms_log is not populated
+    # u_sms_message containing "Incident Resolved" = resolve SMS was sent
     msg = rec.get('u_sms_message', '')
     if msg and 'Incident Resolved' in str(msg):
         return msg
+    # u_bg_process: if outage was created via the app (no_app != true),
+    # SMS was handled automatically — no manual SMS deviation
+    bg_raw = rec.get('u_bg_process', '') or '{}'
+    try:
+        bg = _json.loads(bg_raw)
+    except (ValueError, TypeError):
+        bg = {}
+    if bg.get('outage_created') and not bg.get('no_app', False):
+        return 'sms_via_outage_app'
     return None
 
 def _driftinfo(rec):
