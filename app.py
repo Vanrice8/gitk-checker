@@ -416,8 +416,8 @@ else:
                 "Week":                 r["_week"],
                 "Ticket":               r["_ticket_no"],
                 "Identified Deviation": dev,
-                "Notes":                note if note in NOTES_OPTIONS else None,
-                "Measures Taken":       meas if meas in MEASURES_OPTIONS else None,
+                "Notes":                note,
+                "Measures Taken":       meas,
             })
         st.session_state["nm_data"]       = pd.DataFrame(nm_rows)
         st.session_state["nm_filter_key"] = filter_key
@@ -428,12 +428,8 @@ else:
             "Week":                 st.column_config.TextColumn(disabled=True, width="small"),
             "Ticket":               st.column_config.TextColumn(disabled=True, width="small"),
             "Identified Deviation": st.column_config.TextColumn(disabled=True, width="medium"),
-            "Notes":          st.column_config.SelectboxColumn(
-                                  options=NOTES_OPTIONS, width="large",
-                              ),
-            "Measures Taken": st.column_config.SelectboxColumn(
-                                  options=MEASURES_OPTIONS, width="medium",
-                              ),
+            "Notes":          st.column_config.TextColumn(width="large"),
+            "Measures Taken": st.column_config.TextColumn(width="medium"),
         },
         hide_index=True,
         use_container_width=True,
