@@ -179,6 +179,22 @@ with st.sidebar:
     st.markdown("## 🔍 GITK Checker")
     st.markdown("---")
 
+    st.markdown("### Apps")
+    st.markdown(
+        """
+        <div style="display:flex;flex-direction:column;gap:0.4rem;margin-bottom:0.5rem">
+          <a href="https://4ig74m8abezhu4ighxtxwe.streamlit.app/"
+             target="_blank"
+             style="font-size:0.9rem;font-weight:600;color:#6ea8ff;text-decoration:none;">
+            📊 Comp Tracker ↗
+          </a>
+          <span style="font-size:0.9rem;font-weight:700;color:white">🔍 GITK Checker</span>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    st.markdown("---")
+
     st.markdown("### 1 · Incident Data")
     incidents_file = st.file_uploader(
         "incidents.json  *(columns A–Q)*",
